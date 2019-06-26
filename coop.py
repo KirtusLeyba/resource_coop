@@ -51,15 +51,22 @@ class Agent:
 		self.neighbors = []
 		self.numSenses = 9 + 8*n + 8
 		### actions
-		# move
-		# steal
-		# trade
-		# pick-up
-		# rest
-		self.numActions = 8*3 + 2
+		# move 8
+		# steal 8
+		# trade 8
+		# pick-up 1
+		# rest 1
+		# reproduce 1
+		self.numActions = 8*3 + 3
 		self.n = n
 		self.nodeAt = None
 		self.pastMoves = np.zeros(n)
+
+		### resource storage
+		self.resources = 10.0
+
+		### action costs
+		self.moveCost = 1.0
 
 		### sense vector
 		self.s = np.zeros(self.numSenses)
@@ -118,3 +125,6 @@ class Agent:
 					self.nodeAt.neighbors[actionIndex].agentHere = self
 					self.nodeAt.agentHere = None
 					self.nodeAt = self.nodeAt.neighbors[actionIndex]
+					self.x = self.nodeAt.x
+					self.y = self.nodeAt.y
+			self.resources -= self.moveCost
