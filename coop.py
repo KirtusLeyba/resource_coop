@@ -50,7 +50,13 @@ class Agent:
 		self.y = y
 		self.neighbors = []
 		self.numSenses = 9 + 8*n + 8
-		self.numActions = (9*8)*2 + 12
+		### actions
+		# move
+		# steal
+		# trade
+		# pick-up
+		# rest
+		self.numActions = 8*3 + 2
 		self.n = n
 		self.nodeAt = None
 		self.pastMoves = np.zeros(n)
@@ -97,4 +103,18 @@ class Agent:
 
 	### determine what action to take
 	def calcAction(self):
-		self.a = np.dot(self.B, self.s)
+		self.a = np.dot(self.s, self.B)
+
+	def randomizeBrain(self):
+		self.B = np.random.random((self.numSenses, self.numActions))
+
+	def takeAction(self):
+		actionIndex = np.argmax(self.a)
+
+		### move
+		if(actionIndex >= 0 and actionIndex < 8):
+			if(len(self.nodeAt.neighbors) > actionIndex):
+				if(self.nodeAt.neighbors[actionIndex].agentHere == None):
+					self.nodeAt.neighbors[actionIndex].agentHere = self
+					self.nodeAt.agentHere = None
+					self.nodeAt = self.nodeAt.neighbors[actionIndex]
