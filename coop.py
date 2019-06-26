@@ -10,11 +10,11 @@ class SpaceNode:
 		self.resources = 0.0
 		self.agentHere = None
 
-	def __str__(self):
+	def tostr(self):
 		return str(self.x) + ", " + str(self.y)
 
 	def __hash__(self):
-		return hash(str(self))
+		return hash(self.tostr())
 
 	def __eq__(self, other):
 		return hash(self) == hash(other)
@@ -34,10 +34,10 @@ def createRectangleGrid(width, height):
 		for j in range(height):
 			for ii in range(-1,2):
 				for jj in range(-1,2):
-					if(ii >= 0 and ii < width \
-						and jj >= 0 and jj < width \
+					if(i+ii >= 0 and i+ii < width \
+						and j+jj >= 0 and j+jj < width \
 						and not(ii == 0 and jj ==0)):
-						grid[i][j].neighbors.append(grid[ii][jj])
+						grid[i][j].neighbors.append(grid[i+ii][j+jj])
 	return grid
 
 ### Agent of the simulation
@@ -61,6 +61,19 @@ class Agent:
 		self.B = np.zeros((self.numSenses, self.numActions))
 		### actions
 		self.a = np.zeros(self.numActions)
+
+	def __eq__(self, other):
+		if(other == None):
+			return False
+		elif(self.x == other.x and self.y == other.y):
+			return True
+		return False
+
+	def __neq__(self, other):
+		return not(self == other)
+
+	def __hash__(self):
+		return hash(str(self.x) + ", " + str(self.y))
 
 	### calculate the sense vector
 	def calcSenseVector(self):
