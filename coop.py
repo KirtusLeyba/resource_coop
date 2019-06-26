@@ -3,7 +3,7 @@ import numpy as np
 ### The space node class represents the spatial container for agents and
 ### resources
 class SpaceNode:
-	def __init__(self, x, y)
+	def __init__(self, x, y):
 		self.x = x
 		self.y = y
 		self.neighbors = []
@@ -24,9 +24,10 @@ def createRectangleGrid(width, height):
 	grid = []
 
 	for i in range(width):
+		grid.append([])
 		for j in range(height):
 			s = SpaceNode(i,j)
-			grid.append(s)
+			grid[i].append(s)
 
 	### assign neighbors
 	for i in range(width):
