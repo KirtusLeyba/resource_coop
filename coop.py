@@ -7,7 +7,7 @@ class SpaceNode:
 		self.x = x
 		self.y = y
 		self.neighbors = []
-		self.resources = 0.0
+		self.resources = 1.0
 		self.agentHere = None
 
 	def tostr(self):
@@ -67,6 +67,13 @@ class Agent:
 
 		### action costs
 		self.moveCost = 1.0
+        self.stealGain = 1.0
+        self.stealCost = 1./2
+        self.tradeCost = 1 #is also trade gain for trade partner
+        self.pickupCost = 0.5
+        self.pickupGain = 1
+        self.reproduceCost = 0.5
+        self.mutationRate = 10
 
 		### sense vector
 		self.s = np.zeros(self.numSenses)
@@ -128,3 +135,39 @@ class Agent:
 					self.x = self.nodeAt.x
 					self.y = self.nodeAt.y
 			self.resources -= self.moveCost
+
+        ## steal
+        if(actionIndex >= 8 and actionIndex < 16):
+            if(len(self.nodeAt.neighbors) > actionIndex):
+                if(self.nodeAt.neighbors[actionIndex-8].agentHere != None):
+                    self.nodeAt.neighbors[actionIndex-8].agentHere.resources -= self.stealGain
+                    self.resources += self.stealGain
+            self.resources -= self.stealCost
+
+        ##trade
+        if(actionIndex >=16 and actionIndex < 24):
+            if(len(self.nodeAt.neighbors) > actionIndex):
+                if(self.nodeAt.neighbors[actionIndex-16].agentHere != None):
+                    self.nodeAt.neighbors[actionIndex-16].agentHere.resources += self.tradeCost
+            self.resources -= self.tradeCost
+            
+         ##pickup
+        if(actionIndex == 24):
+            if(self.nodeAt.resources != 0):
+                self.nodeAt.resorces -= self.pickupGain
+                self.resources += self.pickupGain
+            self.resources -= self.pickupCost
+        
+        ##reproduce
+        if(actionIndex >= 25):
+            if(len(self.nodeAt.neighbors) > actionIndex):
+				if(self.nodeAt.neighbors[actionIndex-25].agentHere == None):
+                    a = Agent(self.nodeAt.neighbors[actionIndex-25].x, self.nodeAt.neighbors[actionIndex-25].y, 2)
+                    a.B = np.add(self.B, np.random.random((self.numSenses, self.numActions))/self.mutationRate)
+                    a.resources = self.resources/2
+                    self.nodeAt.neighbors[actionIndex].agentHere = a
+                    self.resoures /= 2
+            self.resources -= self.reproduceCost
+                    
+                    
+            
