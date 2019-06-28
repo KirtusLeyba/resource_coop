@@ -23,10 +23,10 @@ for i in range(popSize):
     a.randomizeBrain()
     agentList.append(a)
 
+resources = []
+count = 0.0
 
 
-#### Run the sim and animate live
-data = np.zeros((width, height))
 
 def init():
     im.set_data(data)
@@ -34,21 +34,27 @@ def init():
 
 def animate(i):
 
+    data = np.zeros((width, height))
+
+    count = 0.0
+    resources.append(0.0)
     for x in range(width):
         for y in range(height):
-            grid[x][y].resources += 0.1
+            if(i == 0):
+                grid[x][y].resources += 1.0
+            count += 1
+            resources[-1] += grid[x][y].resources
 
-    data = np.zeros((width, height))
     agentsToBirth = []
     agentsToKill = []
     for a in agentList:
-        data[a.x, a.y] = a.resources
+        data[a.x, a.y] = 1.0 + a.resources
         a.calcSenseVector()
         a.calcAction()
         offspring = a.takeAction()
         if(offspring != None):
             agentsToBirth.append(offspring)
-        if(a.resources < 0.0):
+        if(a.resources <= 0.0000001):
             agentsToKill.append(a)
     for a in agentsToKill:
         agentList.remove(a)
@@ -59,6 +65,7 @@ def animate(i):
 
     return im,
 
+#### Run the sim and animate live
 data = np.zeros((width, height))
 for a in agentList:
     data[a.x, a.y] = a.resources
@@ -66,7 +73,12 @@ for a in agentList:
 fig, ax = plt.subplots()
 ax.set_xlim((-0.5, width-0.5))
 ax.set_ylim((-0.5, height-0.5))
-im = ax.imshow(data)
+im = ax.imshow(data, cmap="cividis")
 
 anim = animation.FuncAnimation(fig, animate, init_func=init, blit=False, interval=1000/60)
+plt.show()
+
+
+plt.figure()
+plt.plot(resources)
 plt.show()

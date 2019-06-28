@@ -49,13 +49,17 @@ class Agent:
         self.x = x
         self.y = y
         self.neighbors = []
+        ###senses
+        # resources 9
+        # 8*n (n actions remembered on 8 neighbors)
+        # how many neighbors 8
         self.numSenses = 9 + 8*n + 8
         ### actions
         # move 8
         # steal 8
         # trade 8
         # pick-up 1
-        # rest 1
+        # rest 1 (?)
         # reproduce 1
         self.numActions = 8*3 + 2
         self.n = n
@@ -66,16 +70,16 @@ class Agent:
         self.resources = 10.0
 
         ### action costs
-        self.moveCost = 0.0001
+        self.moveCost = 0.01
         self.stealGain = 0.25
         self.stealCost =  0.1
         self.tradeCost = 0.5 #is also trade gain for trade partner
         self.pickupCost = 0.1
         self.pickupGain = 0.5
-        self.reproduceCost = 0.0
-        self.reprodRate = 0.1
+        self.reproduceCost = 0.05
+        self.reprodRate = 0.01
         self.mutationRate =  0.05
-        self.aging = 0.0001
+        self.aging = 0.1
 
         ### sense vector
         self.s = np.zeros(self.numSenses)
@@ -122,7 +126,7 @@ class Agent:
         self.a = np.dot(self.s, self.B)
 
     def randomizeBrain(self):
-        self.B = np.random.random((self.numSenses, self.numActions))
+        self.B = np.random.random((self.numSenses, self.numActions)) - 0.5
 
     def takeAction(self):
 
@@ -176,18 +180,26 @@ class Agent:
         
         ##reproduce
         if(np.random.random() < self.reprodRate):
-            reproIndex = np.random.randint(0,9)
-            if(len(self.nodeAt.neighbors) > reproIndex):
-                if(self.nodeAt.neighbors[reproIndex].agentHere == None):
-                    a = Agent(self.nodeAt.neighbors[reproIndex].x, self.nodeAt.neighbors[reproIndex].y, 2)
-                    a.B = np.add(self.B, np.random.random((self.numSenses, self.numActions))*self.mutationRate)
-                    a.resources = self.resources/2
-                    self.nodeAt.neighbors[reproIndex].agentHere = a
-                    a.nodeAt = self.nodeAt.neighbors[reproIndex]
-                    self.nodeAt.neighbors[reproIndex].agentHere = a
-                    self.resources /= 2
-                    offSpring = a
-            self.resources -= self.reproduceCost
+            freeNeighborNodes = []
+            for n in self.nodeAt.neighbors:
+                if(n.agentHere == None):
+                    freeNeighborNodes.append(n)
+
+            if(len(freeNeighborNodes) > 0):
+
+                np.random.shuffle(freeNeighborNodes)
+                reproIndex = np.random.randint(0,len(freeNeighborNodes))
+                reproduceNode = freeNeighborNodes[reproIndex]
+
+                a = Agent(reproduceNode.x, reproduceNode.y, 2)
+                a.B = np.add(self.B, (np.random.random((self.numSenses, self.numActions)) - 0.5)*self.mutationRate)
+                a.resources = self.resources/2
+                reproduceNode.agentHere = a
+                a.nodeAt = reproduceNode
+                reproduceNode.agentHere = a
+                self.resources /= 2
+                offSpring = a
+                self.resources -= self.reproduceCost
 
         self.resources -= self.aging
 
