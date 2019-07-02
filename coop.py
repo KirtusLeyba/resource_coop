@@ -81,7 +81,7 @@ class Agent:
         self.reproduceCost = 0.05
         self.reprodRate = 0.01
         self.mutationRate =  0.05
-        self.aging = 0.1
+        self.aging = 0.005
 
         ### sense vector
         self.s = np.zeros(self.numSenses)
