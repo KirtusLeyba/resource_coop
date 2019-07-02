@@ -7,7 +7,9 @@ class SpaceNode:
         self.x = x
         self.y = y
         self.neighbors = []
-        self.resources = 1.0
+        self.carryingCapacity=4
+        self.resourceRate=0.5
+        self.resources = 5
         self.agentHere = None
 
     def tostr(self):
@@ -134,6 +136,8 @@ class Agent:
 
         actionIndex = np.argmax(self.a)
 
+        chosenAction = 0
+
         ### move
         if(actionIndex >= 0 and actionIndex < 8):
             if(len(self.nodeAt.neighbors) > actionIndex):
@@ -144,6 +148,7 @@ class Agent:
                     self.x = self.nodeAt.x
                     self.y = self.nodeAt.y
             self.resources -= self.moveCost
+            chosenAction = 1
 
         ## steal
         if(actionIndex >= 8 and actionIndex < 16):
@@ -156,6 +161,7 @@ class Agent:
                         self.resources += self.nodeAt.neighbors[actionIndex-8].agentHere.resources
                         self.nodeAt.neighbors[actionIndex-8].agentHere.resources = 0
             self.resources -= self.stealCost
+            chosenAction = 2
 
         ##trade
         if(actionIndex >=16 and actionIndex < 24):
@@ -167,7 +173,8 @@ class Agent:
                     else:
                         self.nodeAt.neighbors[actionIndex-16].agentHere.resources += self.resources
                         self.resources = 0
-            
+            chosenAction = 3
+
          ##pickup
         if(actionIndex == 24):
             if(self.nodeAt.resources > self.pickupGain):
@@ -177,7 +184,8 @@ class Agent:
                 self.resources += self.nodeAt.resources
                 self.nodeAt.resources = 0.0
             self.resources -= self.pickupCost
-        
+            chosenAction = 4
+
         ##reproduce
         if(np.random.random() < self.reprodRate):
             freeNeighborNodes = []
@@ -206,7 +214,4 @@ class Agent:
         if(self.resources < 0.0):
             self.resources = 0.0
 
-        return offSpring
-                    
-                    
-            
+        return [offSpring, chosenAction]
