@@ -214,4 +214,10 @@ class Agent:
         if(self.resources < 0.0):
             self.resources = 0.0
 
+
+        if(len(self.pastMoves) >= 1):
+            for i in range(1,len(self.pastMoves)):
+                self.pastMoves[i] = self.pastMoves[i-1]
+            self.pastMoves[0] = chosenAction
+
         return [offSpring, chosenAction]
